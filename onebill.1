@@ -1,0 +1,477 @@
+.\" Manpage for onebill.
+.TH "ONEBILL" "1" "April 18, 2026" "\ \&" "\ \&"
+
+.SH NAME
+onebill \- Minimalist and opinionated feed reader
+
+.SH SYNOPSIS
+\fBonebill\fR [\fBoptions\fR]
+
+.SH DESCRIPTION
+\fBonebill\fR is a minimalist and opinionated feed reader.
+
+.SH OPTIONS
+.B \-h, \-help
+.RS 4
+Show usage information and exit\&.
+.RE
+.PP
+.B \-config-dump
+.RS 4
+Print parsed configuration values.
+.br
+This will include sensitive information like passwords\&.
+.RE
+.PP
+.B \-c /path/to/onebill.conf
+.RS 4
+Load configuration file\&.
+.RE
+.PP
+.B \-config-file /path/to/onebill.conf
+.RS 4
+Load configuration file\&.
+.RE
+.PP
+.B \-create-admin
+.RS 4
+Create an admin user from an interactive terminal\&.
+.RE
+.PP
+.B \-debug
+.RS 4
+Set log level to debug\&.
+.RE
+.PP
+.B \-flush-sessions
+.RS 4
+Flush all sessions (disconnect users)\&.
+.RE
+.PP
+.B \-healthcheck <endpoint>
+.RS 4
+Perform a health check on the given endpoint\&.
+.br
+The value "auto" tries to guess the health check endpoint\&.
+.RE
+.PP
+.B \-i
+.RS 4
+Show build information\&.
+.RE
+.PP
+.B \-info
+.RS 4
+Show build information\&.
+.RE
+.PP
+.B \-migrate
+.RS 4
+Run SQL migrations\&.
+.RE
+.PP
+.B \-reset-feed-errors
+.RS 4
+Clear all feed errors for all users\&.
+.RE
+.PP
+.B \-reset-feed-next-check-at
+.RS 4
+Reset the next check time for all feeds\&.
+.RE
+.PP
+.B \-reset-password
+.RS 4
+Reset user password\&.
+.RE
+.PP
+.B \-run-cleanup-tasks
+.RS 4
+Run cleanup tasks (delete old sessions and archive old entries)\&.
+.RE
+.PP
+.B \-v
+.RS 4
+Show application version\&.
+.RE
+.PP
+.B \-version
+.RS 4
+Show application version\&.
+.RE
+
+.SH CONFIGURATION FILE
+The configuration file is a text file that follows these rules:
+.LP
+- OneBill expects each line to be in KEY=VALUE format.
+.br
+- Lines beginning with # are processed as comments and ignored.
+.br
+- Blank lines are ignored.
+.br
+- There is no variable interpolation.
+.PP
+Keys are the same as the environment variables described below\&.
+.br
+Environment variables override the values defined in the config file\&.
+
+.SH ENVIRONMENT
+Boolean options accept the following values (case-insensitive):
+1/0, yes/no, true/false, on/off\&.
+.br
+For variables ending in \fB_FILE\fR, the value is a path to a file
+that contains the corresponding secret value\&.
+.TP
+.B ADMIN_PASSWORD
+Admin user password, used only if \fBCREATE_ADMIN\fR is enabled\&.
+.br
+Default is empty\&.
+.TP
+.B ADMIN_PASSWORD_FILE
+Path to a secret key exposed as a file, it should contain the
+\fBADMIN_PASSWORD\fR value\&.
+.br
+Default is empty\&.
+.TP
+.B ADMIN_USERNAME
+Admin user login, used only if \fBCREATE_ADMIN\fR is enabled\&.
+.br
+Default is empty\&.
+.TP
+.B ADMIN_USERNAME_FILE
+Path to a secret key exposed as a file, it should contain the
+\fBADMIN_USERNAME\fR value\&.
+.br
+Default is empty\&.
+.TP
+.B AUTH_PROXY_HEADER
+Proxy authentication HTTP header\&.
+.br
+The option \fBTRUSTED_REVERSE_PROXY_NETWORKS\fR must be configured
+to allow the proxy to authenticate users\&.
+.br
+Default is empty.
+.TP
+.B AUTH_PROXY_USER_CREATION
+Set to 1 to create users based on proxy authentication information\&.
+.br
+When disabled, users must already exist in OneBill to sign in
+through the proxy\&.
+.br
+Disabled by default\&.
+.TP
+.B BASE_URL
+Base URL to generate HTML links and base path for cookies\&.
+.br
+Default is http://localhost\&.
+.TP
+.B CERT_DOMAIN
+Use Let's Encrypt to get automatically a certificate for this domain\&.
+.br
+Default is empty\&.
+.TP
+.B CERT_FILE
+Path to SSL certificate\&.
+.br
+Default is empty\&.
+.TP
+.B CLEANUP_ARCHIVE_BATCH_SIZE
+Number of entries to archive for each job interval\&.
+.br
+Default is 10000 entries\&.
+.TP
+.B CLEANUP_ARCHIVE_READ_DAYS
+Number of days before the cleanup job archives read entries\&.
+.br
+Archiving deletes non-bookmarked, non-shared read entries from the
+database and records a tombstone to prevent the same entry from being
+imported again during a later feed refresh\&.
+.br
+Set to -1 to disable automatic archiving of read entries\&.
+.br
+Default is 60 days\&.
+.TP
+.B CLEANUP_ARCHIVE_UNREAD_DAYS
+Number of days before the cleanup job archives unread entries\&.
+.br
+Archiving deletes non-bookmarked, non-shared unread entries from the
+database and records a tombstone to prevent the same entry from being
+imported again during a later feed refresh\&.
+.br
+Set to -1 to disable automatic archiving of unread entries\&.
+.br
+Default is 180 days\&.
+.TP
+.B CLEANUP_FREQUENCY_HOURS
+Cleanup job frequency. Remove old sessions and archive entries\&.
+.br
+Default is 24 hours\&.
+.TP
+.B CLEANUP_REMOVE_SESSIONS_DAYS
+Number of days after removing old sessions from the database\&.
+.br
+Default is 30 days\&.
+.TP
+.B CREATE_ADMIN
+Set to 1 to create an admin user from environment variables\&.
+.br
+Disabled by default\&.
+.TP
+.B DATABASE_CONNECTION_LIFETIME
+Set the maximum amount of time a connection may be reused\&.
+.br
+Default is 5 minutes\&.
+.TP
+.B DATABASE_MAX_CONNS
+Maximum number of database connections\&.
+.br
+Default is 20\&.
+.TP
+.B DATABASE_MIN_CONNS
+Minimum number of database connections\&.
+.br
+Default is 1\&.
+.TP
+.B DATABASE_URL
+PostgreSQL connection parameters\&.
+.br
+Default is "user=postgres password=postgres dbname=onebill sslmode=disable"\&.
+.TP
+.B DATABASE_URL_FILE
+Path to a secret key exposed as a file, it should contain the
+\fBDATABASE_URL\fR value\&.
+.br
+Default is empty\&.
+.TP
+.B DISABLE_API
+Disable onebill's API\&.
+.br
+Default is false (The API is enabled)\&.
+.TP
+.B DISABLE_HSTS
+Disable HTTP Strict Transport Security header if \fBHTTPS\fR is set\&.
+.br
+Default is false (The HSTS is enabled)\&.
+.TP
+.B DISABLE_HTTP_SERVICE
+Set the value to 1 to disable the HTTP service\&.
+.br
+Default is false (The HTTP service is enabled)\&.
+.TP
+.B DISABLE_LOCAL_AUTH
+Disable local authentication\&.
+.br
+When set to true, the username/password form is hidden from
+the login screen, and the options to change username/password
+or unlink OAuth2 account are hidden from the settings page.
+.br
+This option requires an alternative authentication source
+such as OAuth2 or auth proxy\&.
+.br
+If remote user creation is disabled, only existing users can sign in\&.
+.br
+Default is false\&.
+.TP
+.B DISABLE_SCHEDULER_SERVICE
+Set the value to 1 to disable the internal scheduler service\&.
+.br
+Default is false (The internal scheduler service is enabled)\&.
+.TP
+.B HTTP_SERVER_TIMEOUT
+Read, write, and idle timeout in seconds for the HTTP server\&.
+.br
+Default is 300 seconds\&.
+.TP
+.B HTTPS
+Forces cookies to use secure flag and send HSTS header\&.
+.br
+Default is disabled\&.
+.TP
+.B INTEGRATION_ALLOW_PRIVATE_NETWORKS
+Set to 1 to allow outgoing integration requests to private
+or loopback networks\&.
+.br
+Disabled by default, private networks are refused\&.
+.TP
+.B KEY_FILE
+Path to SSL private key\&.
+.br
+Default is empty\&.
+.TP
+.B LISTEN_ADDR
+Address to listen on.
+Use absolute path to listen on Unix socket
+(/var/run/onebill.sock)\&.
+.br
+Multiple addresses can be specified, separated by commas.
+For example: 127.0.0.1:8080, 127.0.0.1:8081\&.
+.br
+Default is 127.0.0.1:8080\&.
+.TP
+.B LOG_DATE_TIME
+Display the date and time in log messages\&.
+.br
+Disabled by default\&.
+.TP
+.B LOG_FILE
+Supported values are "stderr", "stdout", or a file name\&.
+.br
+Default is "stderr"\&.
+.TP
+.B LOG_FORMAT
+Supported log formats are "text" or "json"\&.
+.br
+Default is "text"\&.
+.TP
+.B LOG_LEVEL
+Supported values are "debug", "info", "warning", or "error"\&.
+.br
+Default is "info"\&.
+.TP
+.B MAINTENANCE_MESSAGE
+Define a custom maintenance message\&.
+.br
+Default is "OneBill is currently under maintenance"\&.
+.TP
+.B MAINTENANCE_MODE
+Set to 1 to enable maintenance mode\&.
+.br
+Disabled by default\&.
+.TP
+.B METRICS_ALLOWED_NETWORKS
+List of networks allowed to access the metrics endpoint
+(comma-separated values)\&.
+.br
+Default is 127.0.0.1/8\&.
+.TP
+.B METRICS_COLLECTOR
+Set to 1 to enable metrics collector. Expose a /metrics endpoint for Prometheus.
+.br
+Disabled by default\&.
+.TP
+.B METRICS_PASSWORD
+Metrics endpoint password for basic HTTP authentication\&.
+.br
+Default is empty\&.
+.TP
+.B METRICS_PASSWORD_FILE
+Path to a file that contains the password for the metrics
+endpoint HTTP authentication\&.
+.br
+Default is empty\&.
+.TP
+.B METRICS_REFRESH_INTERVAL
+Refresh interval to collect database metrics\&.
+.br
+Default is 60 seconds\&.
+.TP
+.B METRICS_USERNAME
+Metrics endpoint username for basic HTTP authentication\&.
+.br
+Default is empty\&.
+.TP
+.B METRICS_USERNAME_FILE
+Path to a file that contains the username for the metrics
+endpoint HTTP authentication\&.
+.br
+Default is empty\&.
+.TP
+.B OAUTH2_CLIENT_ID
+OAuth2 client ID\&.
+.br
+Default is empty\&.
+.TP
+.B OAUTH2_CLIENT_ID_FILE
+Path to a secret key exposed as a file, it should contain the
+\fBOAUTH2_CLIENT_ID\fR value\&.
+.br
+Default is empty\&.
+.TP
+.B OAUTH2_CLIENT_SECRET
+OAuth2 client secret\&.
+.br
+Default is empty\&.
+.TP
+.B OAUTH2_CLIENT_SECRET_FILE
+Path to a secret key exposed as a file, it should contain the
+\fBOAUTH2_CLIENT_SECRET\fR value\&.
+.br
+Default is empty\&.
+.TP
+.B OAUTH2_OIDC_DISCOVERY_ENDPOINT
+OpenID Connect discovery endpoint\&.
+.br
+Default is empty\&.
+.TP
+.B OAUTH2_OIDC_PROVIDER_NAME
+Name to display for the OIDC provider\&.
+.br
+Default is "OpenID Connect"\&.
+.TP
+.B OAUTH2_PROVIDER
+Possible values are "google" or "oidc"\&.
+.br
+Default is empty\&.
+.TP
+.B OAUTH2_REDIRECT_URL
+OAuth2 redirect URL\&.
+.br
+This URL must be registered with the provider and is
+something like
+https://onebill.example.org/oauth2/oidc/callback\&.
+.br
+Default is empty\&.
+.TP
+.B OAUTH2_USER_CREATION
+Set to 1 to authorize OAuth2 user creation\&.
+.br
+When disabled, users must already exist in OneBill or have
+a linked OAuth2 account to sign in\&.
+.br
+Disabled by default\&.
+.TP
+.B POLLING_PARSING_ERROR_LIMIT
+The maximum number of parsing errors that the program will
+try before stopping polling a feed.
+.br
+Once the limit is reached, the user must refresh the feed
+manually. Set to 0 for unlimited.
+.br
+Default is 3\&.
+.TP
+.B PORT
+Override \fBLISTEN_ADDR\fR to \fB0.0.0.0:$PORT\fR\&.
+.br
+Default is empty\&.
+.TP
+.B RUN_MIGRATIONS
+Set to 1 to run database migrations\&.
+.br
+Disabled by default\&.
+.TP
+.B TRUSTED_REVERSE_PROXY_NETWORKS
+A comma-separated list of networks (CIDR notation) allowed to use the proxy
+authentication header, \fBX-Forwarded-For\fR,
+\fBX-Forwarded-Proto\fR, and \fBX-Real-Ip\fR headers\&.
+.br
+Default is empty\&.
+.TP
+.B WATCHDOG
+Enable or disable Systemd watchdog\&.
+.br
+Enabled by default\&.
+.TP
+.B WEBAUTHN
+Enable or disable WebAuthn/Passkey authentication\&.
+.br
+You must provide a username on the login page if you are
+using non-residential keys.
+However, this is not required for discoverable credentials\&.
+.br
+Default is disabled\&.
+.SH AUTHORS
+OneBill is developed and maintained by Fr\['e]d\['e]ric Guillot
+with contributions from the OneBill community\&.
+
+.SH "COPYRIGHT"
+OneBill is released under the Apache 2.0 license\&.

@@ -1,0 +1,38 @@
+services:
+  onebill:
+    image: ghcr.io/tarekahsan709/onebill:latest
+    # To build from this checkout instead of pulling a published image:
+    #   build:
+    #     context: .
+    #     dockerfile: packaging/docker/alpine/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      - DATABASE_URL=postgres://onebill:secret@db/onebill?sslmode=disable
+      - RUN_MIGRATIONS=1
+      - CREATE_ADMIN=1
+      - ADMIN_USERNAME=admin
+      - ADMIN_PASSWORD=changeme
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/usr/bin/onebill", "-healthcheck", "auto"]
+
+  db:
+    image: postgres:17-alpine
+    environment:
+      - POSTGRES_USER=onebill
+      - POSTGRES_PASSWORD=secret
+      - POSTGRES_DB=onebill
+    volumes:
+      - onebill-db:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "onebill"]
+      interval: 10s
+      start_period: 30s
+
+volumes:
+  onebill-db:

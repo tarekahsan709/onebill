@@ -1,0 +1,54 @@
+{{ define "title"}}{{ t "page.edit_feed.title" .feed.Title }}{{ end }}
+
+{{ define "page_header"}}
+<section class="page-header" aria-labelledby="page-header-title">
+    <h1 id="page-header-title" dir="auto">{{ .feed.Title }}</h1>
+    <nav aria-label="{{ .feed.Title }} {{ t "menu.title" }}">
+        <ul>
+            <li>
+                <a href="{{ routePath "/feeds" }}">{{ icon "feeds" }}{{ t "menu.feeds" }}</a>
+            </li>
+            <li>
+                <a href="{{ routePath "/feed/%d/entries" .feed.ID }}">{{ icon "entries" }}{{ t "menu.feed_entries" }}</a>
+            </li>
+        </ul>
+    </nav>
+</section>
+{{ end }}
+
+{{ define "content"}}
+{{ if ne .feed.ParsingErrorCount 0 }}
+<div role="alert" class="alert alert-error">
+    <h3>{{ t "page.edit_feed.last_parsing_error" }}</h3>
+    <p>{{ t .feed.ParsingErrorMsg }}</p>
+</div>
+{{ end }}
+
+<form action="{{ routePath "/feed/%d/update" .feed.ID }}" method="post" autocomplete="off">
+    <input type="hidden" name="csrf" value="{{ .csrf }}">
+
+    {{ if .errorMessage }}
+        <div role="alert" class="alert alert-error">{{ .errorMessage }}</div>
+    {{ end }}
+
+    <fieldset>
+        <legend>{{ t "form.feed.fieldset.general" }}</legend>
+
+        <label for="form-title">{{ t "form.feed.label.title" }}</label>
+        <input type="text" name="title" id="form-title" value="{{ .form.Title }}" spellcheck="false" required>
+
+        <label for="form-site-url">{{ t "form.feed.label.site_url" }}</label>
+        <input type="url" name="site_url" id="form-site-url" placeholder="https://domain.tld/" value="{{ .form.SiteURL }}" spellcheck="false" required>
+
+        <label for="form-feed-url">{{ t "form.feed.label.feed_url" }}</label>
+        <input type="url" name="feed_url" id="form-feed-url" placeholder="https://domain.tld/" value="{{ .form.FeedURL }}" spellcheck="false" required>
+
+        <label><input type="checkbox" name="disabled" value="1" {{ if .form.Disabled }}checked{{ end }}> {{ t "form.feed.label.disabled" }}</label>
+    </fieldset>
+
+    <div class="buttons">
+        <button type="submit" class="button button-primary" data-label-loading="{{ t "form.submit.saving" }}">{{ t "action.update" }}</button>
+        <a href="{{ routePath "/feeds" }}">{{ t "action.cancel" }}</a>
+    </div>
+</form>
+{{ end }}

@@ -1,0 +1,30 @@
+{{ define "item_meta" -}}
+<div class="item-meta">
+    <ul class="item-meta-info">
+        <li class="item-meta-info-title">
+            <a href="{{ routePath "/feed/%d/entries" .entry.Feed.ID }}" title="{{ .entry.Feed.SiteURL }}" data-feed-link="true">{{ truncate .entry.Feed.Title 35 }}</a>
+        </li>
+        <li class="item-meta-info-timestamp">
+            <time datetime="{{ isodate .entry.Date }}" title="{{ isodate .entry.Date }}">{{ elapsed .user.Timezone .entry.Date }}</time>
+        </li>
+    </ul>
+    <ul class="item-meta-icons">
+        <li class="item-meta-icons-read">
+            <button
+                aria-describedby="entry-title-{{ .entry.ID }}"
+                title="{{ t "entry.status.title" }}"
+                data-toggle-status="true"
+                data-label-loading="{{ t "entry.state.saving" }}"
+                data-label-read="{{ t "entry.status.mark_as_read" }}"
+                data-label-unread="{{ t "entry.status.mark_as_unread" }}"
+                data-value="{{ if eq .entry.Status "read" }}read{{ else }}unread{{ end }}"
+                >{{ if eq .entry.Status "read" }}{{ icon "unread" }}{{ else }}{{ icon "read" }}{{ end }}<span class="icon-label">{{ if eq .entry.Status "read" }}{{ t "entry.status.mark_as_unread" }}{{ else }}{{ t "entry.status.mark_as_read" }}{{ end }}</span></button>
+        </li>
+        <li class="item-meta-icons-external-url">
+            <a href="{{ .entry.URL }}"
+                aria-describedby="entry-title-{{ .entry.ID }}"
+                rel="noopener">{{ icon "external-link" }}<span class="icon-label">{{ t "entry.external_link.label" }}</span></a>
+        </li>
+    </ul>
+</div>
+{{ end }}

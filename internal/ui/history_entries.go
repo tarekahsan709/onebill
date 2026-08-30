@@ -1,0 +1,48 @@
+// SPDX-FileCopyrightText: Copyright The Miniflux Authors. All rights reserved.
+// SPDX-FileCopyrightText: Copyright The OneBill Authors. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
+
+package ui // import "onebill.app/internal/ui"
+
+import (
+	"net/http"
+
+	"onebill.app/internal/http/request"
+	"onebill.app/internal/http/response"
+	"onebill.app/internal/model"
+	"onebill.app/internal/ui/view"
+)
+
+func (h *handler) showHistoryPage(w http.ResponseWriter, r *http.Request) {
+	user, err := h.store.UserByID(request.UserID(r))
+	if err != nil {
+		response.HTMLServerError(w, r, err)
+		return
+	}
+
+	offset := request.QueryIntParam(r, "offset", 0)
+
+	entries, count, err := h.store.NewEntryQueryBuilder(user.ID).
+		WithStatuses(model.EntryStatusRead).
+		WithSorting("changed_at", "DESC").
+		WithSorting("published_at", "DESC").
+		WithOffset(offset).
+		WithLimit(user.EntriesPerPage).
+		GetEntriesWithCount()
+	if err != nil {
+		response.HTMLServerError(w, r, err)
+		return
+	}
+
+	view := view.New(h.tpl, r)
+	view.Set("entries", entries)
+	view.Set("total", count)
+	view.Set("pagination", getPagination(h.routePath("/history"), count, offset, user.EntriesPerPage))
+	view.Set("menu", "history")
+	view.Set("user", user)
+	navMetadata, _ := h.store.GetNavMetadata(user.ID)
+	view.Set("countUnread", navMetadata.CountUnread)
+	view.Set("countErrorFeeds", navMetadata.CountErrorFeeds)
+
+	response.HTML(w, r, view.Render("history_entries"))
+}

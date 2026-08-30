@@ -1,0 +1,8 @@
+./*.sha256
+/onebill
+onebill-*
+.idea
+.vscode
+
+# Product notes, kept out of the repo
+cloud-cost-dashboard-spec.md

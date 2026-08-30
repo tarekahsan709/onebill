@@ -1,0 +1,66 @@
+// SPDX-FileCopyrightText: Copyright The Miniflux Authors. All rights reserved.
+// SPDX-FileCopyrightText: Copyright The OneBill Authors. All rights reserved.
+// SPDX-License-Identifier: Apache-2.0
+
+package validator // import "onebill.app/internal/validator"
+
+import (
+	"errors"
+	"fmt"
+	"regexp"
+	"strings"
+
+	"onebill.app/internal/model"
+)
+
+var domainRegex = regexp.MustCompile(`^(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,}$`)
+
+// ValidateRange makes sure the offset/limit values are valid.
+func ValidateRange(offset, limit int) error {
+	if offset < 0 {
+		return errors.New(`offset value should be >= 0`)
+	}
+
+	if limit < 0 {
+		return errors.New(`limit value should be >= 0`)
+	}
+
+	if limit > model.MaxEntryLimit {
+		return fmt.Errorf(`limit value should be <= %d`, model.MaxEntryLimit)
+	}
+
+	return nil
+}
+
+// ValidateDirection makes sure the sorting direction is valid.
+func ValidateDirection(direction string) error {
+	switch direction {
+	case "asc", "desc":
+		return nil
+	}
+
+	return errors.New(`invalid direction, valid direction values are: "asc" or "desc"`)
+}
+
+// IsValidDomain verifies a single domain name against length and character constraints.
+func IsValidDomain(domain string) bool {
+	domain = strings.ToLower(domain)
+
+	if len(domain) < 1 || len(domain) > 253 {
+		return false
+	}
+
+	return domainRegex.MatchString(domain)
+}
+
+// IsValidDomainList verifies a space-separated list of domains for validity.
+func IsValidDomainList(value string) bool {
+	domains := strings.SplitSeq(strings.TrimSpace(value), " ")
+	for domain := range domains {
+		if !IsValidDomain(domain) {
+			return false
+		}
+	}
+
+	return true
+}
